@@ -1,0 +1,33 @@
+# This file is merged on top of Harbor's base docker-compose config.
+# The `main` service is automatically configured by Harbor with the build
+# context, image, command, volumes, and resource limits.
+# The loadgen service runs the concurrent-load correctness+latency check
+# against `main` for the whole session and writes scored results Harbor
+# collects as sidecar artifacts for the separate verifier.
+services:
+  main:
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  loadgen:
+    build:
+      context: ./loadgen
+    depends_on:
+      main:
+        condition: service_healthy
+    environment:
+      - MAIN_HOST=main
+      - MAIN_PORT=8000
+      # Repeated measurement passes run back-to-back for up to MAX_WAIT_SEC
+      # (close to [agent].timeout_sec in task.toml); every pass overwrites
+      # results.json, so whatever the *last* pass shows before teardown is
+      # what gets graded -- no restart-detection heuristics needed.
+      - MAX_WAIT_SEC=14000
+      - NUM_REQUESTS=60
+      - CANCEL_FRACTION=0.35
+      - LOAD_SEED=42
+      - LATENCY_SLA_SEC=8.0

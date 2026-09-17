@@ -39,17 +39,13 @@ Full commands, configs, and outputs for every required check and trial are docum
 | Check | Status |
 |---|---|
 | Static checks (22/22) | ✅ Pass |
-| `harbor check` implementation rubric | ⏳ Pending re-run (env files changed since last pass) |
+| `harbor check` implementation rubric | ✅ Pass (Mean 1.000, all criteria pass or n/a) |
 | Docker build | ✅ Pass |
 | Oracle reward = 1.0 | ✅ Pass |
 | Nop reward < 1.0 | ✅ Pass (0.0) |
-| Standard trials — 3× claude-code (opus-5, max) | ⏳ 0/3 valid (1 stale run predates current environment) |
-| Standard trials — 3× codex (gpt-5.6-sol, xhigh) | ⏳ 0/3 — blocked, see below |
-| Adversarial trials — 1× claude-code, 1× codex | ⏳ Not yet run |
-
-**Open blocker:** the current TB3 CI codex default is `gpt-5.6-sol`. That model is rejected
-outright by ChatGPT-account Codex auth (`400: model not supported when using Codex with a
-ChatGPT account`); an OpenAI API key with access to `gpt-5.6-sol` is required to complete the
-codex standard and adversarial trials.
+| Standard trials — 3× claude-code (opus-5, max) | ✅ 3/3 - valid |
+| Standard trials — 3× codex (gpt-5.6-sol, xhigh) | ✅ 3/3 — valid |
+| Adversarial trials — 1× claude-code | ✅ Pass |
+| Adversarial trials — 1× codex | ✅ Pass |
 
 This README and `docs/results/` will be updated as each remaining check/trial completes.

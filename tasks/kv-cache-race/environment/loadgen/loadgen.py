@@ -52,6 +52,16 @@ CANCEL_DELAY_MIN_SEC = float(os.environ.get("CANCEL_DELAY_MIN_SEC", "0.02"))
 CANCEL_DELAY_MAX_SEC = float(os.environ.get("CANCEL_DELAY_MAX_SEC", "0.15"))
 LATENCY_SLA_SEC = float(os.environ.get("LATENCY_SLA_SEC", "8.0"))
 
+# A pass interrupted mid-flight (server restart, or teardown killing
+# connections while a pass is in progress) still has completed_count > 0 but
+# is a degenerate, mostly-errored snapshot -- persisting it would clobber the
+# last real full pass. Require most of the expected non-cancelled requests to
+# have actually completed before this pass is allowed to overwrite results.
+MIN_COMPLETED_TO_PERSIST = int(os.environ.get(
+    "MIN_COMPLETED_TO_PERSIST",
+    str(int(NUM_REQUESTS * (1 - CANCEL_FRACTION) * 0.75)),
+))
+
 RESULTS_DIR = "/results"
 
 
@@ -178,14 +188,15 @@ async def main() -> None:
                 log(f"pass {pass_num}: pass-level error ({exc!r}), retrying")
                 continue
 
-            if result["completed_count"] == 0:
-                # No signal in this pass (e.g. the server is down for a
-                # restart, or teardown has already stopped it) -- keep
-                # whatever the last real measurement showed rather than
-                # clobbering it with a degenerate all-errored snapshot that
-                # happens to land last.
-                log(f"pass {pass_num}: 0 completions (errored={result['errored_count']}), "
-                    "not persisted")
+            if result["completed_count"] < MIN_COMPLETED_TO_PERSIST:
+                # Too few completions to be a real full pass (server down
+                # for a restart, or teardown killed connections mid-pass) --
+                # keep whatever the last real measurement showed rather than
+                # clobbering it with a truncated, mostly-errored snapshot
+                # that happens to land last.
+                log(f"pass {pass_num}: too few completions "
+                    f"({result['completed_count']} < {MIN_COMPLETED_TO_PERSIST}, "
+                    f"errored={result['errored_count']}), not persisted")
                 await asyncio.sleep(0.5)
                 continue
 

@@ -39,12 +39,12 @@ Full commands, configs, and outputs for every required check and trial are docum
 | Check | Status |
 |---|---|
 | Static checks (22/22) | ✅ Pass |
-| `harbor check` implementation rubric | ✅ Pass (Mean 1.000, all criteria pass or n/a) |
+| `harbor check` implementation rubric | ✅ Pass (11/11 criteria pass) |
 | Docker build | ✅ Pass |
 | Oracle reward = 1.0 | ✅ Pass |
 | Nop reward < 1.0 | ✅ Pass (0.0) |
-| Standard trials — 3× claude-code (opus-5, max) | ✅ 3/3 - valid |
-| Standard trials — 3× codex (gpt-5.6-sol, xhigh) | ✅ 3/3 — valid |
+| Standard trials — 3× claude-code (opus-5, max) | ✅ 3/3 pass, mean 1.000 |
+| Standard trials — 3× codex (gpt-5.6-sol, xhigh) | ✅ 3/3 pass, mean 1.000 |
 | Adversarial trials — 1× claude-code | ✅ Pass |
 | Adversarial trials — 1× codex | ✅ Pass |
 
